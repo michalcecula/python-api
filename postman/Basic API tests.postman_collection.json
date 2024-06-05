@@ -1,0 +1,114 @@
+{
+	"info": {
+		"_postman_id": "af907568-3b99-41a9-acd6-eb7417bccae0",
+		"name": "Basic API tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26915250"
+	},
+	"item": [
+		{
+			"name": "Get my IP from ipify.com (json)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Content-Type is application/json\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"    pm.expect(pm.response.headers.has(\"Content-Type\",\"application/json\")).is.true",
+							"    pm.response.to.be.json;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://api.ipify.org/?format=json",
+					"protocol": "https",
+					"host": [
+						"api",
+						"ipify",
+						"org"
+					],
+					"path": [
+						""
+					],
+					"query": [
+						{
+							"key": "format",
+							"value": "json"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get my IP from ipify.com (text)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Content-Type is not application/json\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\");",
+							"    pm.expect(pm.response.headers.has(\"Content-Type\",\"application/json\")).is.false;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://api.ipify.org/?format=text",
+					"protocol": "https",
+					"host": [
+						"api",
+						"ipify",
+						"org"
+					],
+					"path": [
+						""
+					],
+					"query": [
+						{
+							"key": "format",
+							"value": "text"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"pm.test(\"Response must be valid and have a body\", function () {",
+					"     pm.response.to.be.ok;",
+					"     pm.response.to.be.withBody;",
+					"});"
+				]
+			}
+		}
+	]
+}

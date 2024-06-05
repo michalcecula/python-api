@@ -1,0 +1,313 @@
+{
+	"info": {
+		"_postman_id": "993dac29-0595-4e0b-a44a-59f5dfc9656e",
+		"name": "Wordpress CRUD",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26915250"
+	},
+	"item": [
+		{
+			"name": "CREATE new article",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Verify an article was created\", function() {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"var article_response = pm.response.json();",
+							"art_id = article_response.id;",
+							"pm.environment.set(\"article_id\", art_id);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const timestamp = pm.variables.replaceIn('{{$timestamp}}')",
+							"",
+							"const requestBody = {",
+							"    \"title\": \"This is new post \" + timestamp,",
+							"    \"excerpt\": pm.variables.replaceIn('{{$randomLoremSentence}}'),",
+							"    \"content\": pm.variables.replaceIn('{{$randomLoremParagraph}}'),",
+							"    \"status\": \"publish\"",
+							"}",
+							"",
+							"pm.environment.set('article_data', JSON.stringify(requestBody));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{{article_data}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/posts",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"posts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "READ article",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Verify created article was retrieved\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"const articleSource = JSON.parse(pm.environment.get('article_data'));",
+							"const retrievedArticle = pm.response.json();",
+							"",
+							"pm.test('Verify retrieved article has the same title as the one created.', function(){",
+							"   pm.expect(retrievedArticle.title.rendered).to.eql(articleSource.title);",
+							"});",
+							"",
+							"pm.test('Verify retrieved article has the same excerpt as the one created.', function(){",
+							"   pm.expect(retrievedArticle.excerpt.rendered).to.eql('<p>' + articleSource.excerpt + '</p>\\n');",
+							"});",
+							"",
+							"pm.test('Verify retrieved article has the same content as the one created.', function(){",
+							"   pm.expect(retrievedArticle.content.rendered).to.eql('<p>' + articleSource.content + '</p>\\n');",
+							"});",
+							"",
+							"pm.test('Verify retrieved article has the same status as the one created.', function(){",
+							"   pm.expect(retrievedArticle.status).to.eql(articleSource.status);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/posts/{{article_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"posts",
+						"{{article_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UPDATE article",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Verify an article was updated\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"excerpt\": \"This is new excerpt!\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/posts/{{article_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"posts",
+						"{{article_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "READ updated article",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Verify updated article was retrieved\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"const articleSource = JSON.parse(pm.environment.get('article_data'));",
+							"const retrievedArticle = pm.response.json();",
+							"",
+							"pm.test('Verify retrieved article has updated excerpt.', function(){",
+							"   pm.expect(retrievedArticle.excerpt.rendered).to.eql('<p>This is new excerpt!</p>\\n');",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/posts/{{article_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"posts",
+						"{{article_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE article",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Verify an article was deleted\", function() {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/posts/{{article_id}}?force=true",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"posts",
+						"{{article_id}}"
+					],
+					"query": [
+						{
+							"key": "force",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Can not READ deleted article",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Verify an article is not found anymore\", function() {",
+							"    pm.response.to.have.status(404);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/posts/{{article_id}}",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"posts",
+						"{{article_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "HWZg hZIP jEfK XCDE V9WM PQ3t",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "editor",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "https://gaworski.net/wp-json/wp/v2",
+			"type": "string"
+		}
+	]
+}
