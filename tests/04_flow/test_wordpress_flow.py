@@ -77,6 +77,18 @@ def posted_comment(posted_article, commenter_headers, random_comment):
     return response
 
 
+@pytest.fixture(scope='module')
+def posted_reply(posted_comment, editor_headers, random_comment):
+    wordpress_comment_id = posted_comment.json()["id"]
+    payload = {
+        "post": posted_comment.json()["post"],
+        "content": random_comment,
+        "parent": wordpress_comment_id
+    }
+    response = requests.post(url=COMMENTS_ENDPOINT_URL, headers=editor_headers, json=payload)
+    return response
+
+
 ### CREATE ARTICLE
 def test_new_post_is_successfully_created(posted_article):
     assert posted_article.status_code == 201
@@ -111,3 +123,26 @@ def test_new_comment_is_related_to_the_post(posted_comment, posted_article):
 def test_new_comment_content(posted_comment, random_comment):
     wordpress_comment_data = posted_comment.json()
     assert wordpress_comment_data["content"]["rendered"] == f"<p>{random_comment}</p>\n"
+
+
+### CREATE REPLY TO COMMENT
+def test_new_reply_is_successfully_created(posted_reply):
+    assert posted_reply.status_code == 201
+    assert posted_reply.reason == "Created"
+
+
+def test_new_reply_is_related_to_the_comment(posted_comment, posted_reply):
+    wordpress_comment_id = posted_comment.json()["id"]
+    wordpress_reply_parent_id = posted_reply.json()["parent"]
+    assert wordpress_comment_id == wordpress_reply_parent_id
+
+
+def test_new_reply_is_related_to_the_post(posted_article, posted_reply):
+    wordpress_post_id = posted_article.json()["id"]
+    wordpress_reply_post_id = posted_reply.json()["post"]
+    assert wordpress_post_id == wordpress_reply_post_id
+
+
+def test_reply_content(posted_reply, random_comment):
+    wordpress_reply_data = posted_reply.json()
+    assert wordpress_reply_data["content"]["rendered"] == f"<p>{random_comment}</p>\n"
