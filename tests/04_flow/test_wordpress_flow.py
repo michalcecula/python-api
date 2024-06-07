@@ -4,7 +4,7 @@ import requests
 import pytest
 import lorem
 
-# GLOBAL VARIABLES
+### GLOBAL VARIABLES
 EDITOR_USERNAME = 'editor'
 EDITOR_PASSWORD = 'HWZg hZIP jEfK XCDE V9WM PQ3t'
 COMMENTER_USERNAME = 'commenter'
@@ -60,11 +60,16 @@ def posted_article(article, editor_headers):
 
 
 @pytest.fixture(scope='module')
-def posted_comment(posted_article, commenter_headers):
+def random_comment():
+    return lorem.sentence()
+
+
+@pytest.fixture(scope='module')
+def posted_comment(posted_article, commenter_headers, random_comment):
     wordpress_post_id = posted_article.json()["id"]
     payload = {
         "post": wordpress_post_id,
-        "content": "Mój nowy komentarz"
+        "content": random_comment
     }
     response = requests.post(url=COMMENTS_ENDPOINT_URL, headers=commenter_headers, json=payload)
     if response.status_code != 201:
@@ -92,6 +97,17 @@ def test_new_created_post_can_be_read(posted_article, article):
 
 
 ### CREATE COMMENT TO THE POST
-def test_new_comment_to_the_post_is_successfully_created(posted_comment):
+def test_new_post_comment_is_successfully_created(posted_comment):
     assert posted_comment.status_code == 201
     assert posted_comment.reason == "Created"
+
+
+def test_new_comment_is_related_to_the_post(posted_comment, posted_article):
+    wordpress_post_id = posted_article.json()["id"]
+    wordpress_comment_id = posted_comment.json()["post"]
+    assert wordpress_comment_id == wordpress_post_id
+
+
+def test_new_comment_content(posted_comment, random_comment):
+    wordpress_comment_data = posted_comment.json()
+    assert wordpress_comment_data["content"]["rendered"] == f"<p>{random_comment}</p>\n"
