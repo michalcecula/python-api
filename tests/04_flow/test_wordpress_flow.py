@@ -93,6 +93,7 @@ def posted_reply(posted_comment, editor_headers, random_comment):
 def test_new_post_is_successfully_created(posted_article):
     assert posted_article.status_code == 201
     assert posted_article.reason == "Created"
+    assert posted_article.headers["Content-Type"] == "application/json; charset=UTF-8"
 
 
 def test_new_created_post_can_be_read(posted_article, article):
@@ -108,10 +109,16 @@ def test_new_created_post_can_be_read(posted_article, article):
     assert wordpress_post_data["status"] == "publish"
 
 
+def test_article_is_publish_visible(posted_article):
+    article_visibility = posted_article.json()
+    assert article_visibility["status"] == "publish"
+
+
 ### CREATE COMMENT TO THE POST
 def test_new_post_comment_is_successfully_created(posted_comment):
     assert posted_comment.status_code == 201
     assert posted_comment.reason == "Created"
+    assert posted_comment.headers["Content-Type"] == "application/json; charset=UTF-8"
 
 
 def test_new_comment_is_related_to_the_post(posted_comment, posted_article):
@@ -125,10 +132,16 @@ def test_new_comment_content(posted_comment, random_comment):
     assert wordpress_comment_data["content"]["rendered"] == f"<p>{random_comment}</p>\n"
 
 
+def test_comment_is_approved_by_admin(posted_comment):
+    comment_visibility = posted_comment.json()
+    assert comment_visibility["status"] == "approved"
+
+
 ### CREATE REPLY TO COMMENT
 def test_new_reply_is_successfully_created(posted_reply):
     assert posted_reply.status_code == 201
     assert posted_reply.reason == "Created"
+    assert posted_reply.headers["Content-Type"] == "application/json; charset=UTF-8"
 
 
 def test_new_reply_is_related_to_the_comment(posted_comment, posted_reply):
@@ -146,3 +159,8 @@ def test_new_reply_is_related_to_the_post(posted_article, posted_reply):
 def test_reply_content(posted_reply, random_comment):
     wordpress_reply_data = posted_reply.json()
     assert wordpress_reply_data["content"]["rendered"] == f"<p>{random_comment}</p>\n"
+
+
+def test_reply_is_approved_by_admin(posted_reply):
+    reply_visibility = posted_reply.json()
+    assert reply_visibility["status"] == "approved"
